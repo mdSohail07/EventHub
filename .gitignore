@@ -1,8 +1,6 @@
-# Backend ignores
-event-hub-backend/node_modules/
-event-hub-backend/.env
-
-# Frontend ignores
-event-hub-frontend/node_modules/
-event-hub-frontend/.next/
-event-hub-frontend/.env.local
+﻿**/node_modules/
+**/.next/
+**/.env
+**/.env.local
+**/.env*.local
+.DS_Store
