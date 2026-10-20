@@ -1,0 +1,72 @@
+# ============================================================
+# EventHub Backend — CI/CD Pipeline
+# Trigger: Every push to main branch (backend folder changes)
+# Steps: Install → Lint/Syntax Check → Deploy to Render
+# ============================================================
+
+name: 🚀 Backend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'event-hub-backend/**'   # Sirf backend change hone pe chalega
+  pull_request:
+    branches: [main]
+    paths:
+      - 'event-hub-backend/**'
+
+jobs:
+  # ─── JOB 1: CI — Check & Test ──────────────────────────────
+  test:
+    name: ✅ Install & Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: event-hub-backend/package-lock.json
+
+      - name: 📦 Install Dependencies
+        working-directory: event-hub-backend
+        run: npm install
+
+      - name: 🔍 Syntax Check (Node --check)
+        working-directory: event-hub-backend
+        run: |
+          node --check index.js
+          node --check scraper.js
+          echo "✅ No syntax errors found!"
+
+      # Jab future mein tests likhoge toh yeh uncomment karna:
+      # - name: 🧪 Run Tests
+      #   working-directory: event-hub-backend
+      #   run: npm test
+      #   env:
+      #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      #     GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+  # ─── JOB 2: CD — Deploy to Render ─────────────────────────
+  # Sirf main branch pe deploy hoga (PR pe nahi)
+  deploy:
+    name: 🚀 Deploy to Render
+    runs-on: ubuntu-latest
+    needs: test                    # test pass hone ke baad hi chalega
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: 🚀 Trigger Render Deploy Hook
+        run: |
+          echo "Deploying to Render..."
+          curl -s "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+            -X POST \
+            --fail \
+            -o /dev/null \
+            -w "HTTP Status: %{http_code}\n"
+          echo "✅ Render deploy triggered successfully!"
