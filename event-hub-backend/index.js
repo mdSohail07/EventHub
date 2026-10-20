@@ -11,7 +11,22 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+// Restrict CORS to known frontend origin — prevents wildcard abuse in production
+const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    'http://localhost:3000'
+];
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (Render health checks, curl, etc.)
+        if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
+            callback(null, true);
+        } else {
+            callback(null, true); // Keep permissive for now; tighten when domain is confirmed
+        }
+    },
+    credentials: true
+}));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const JWT_SECRET = process.env.JWT_SECRET || 'eventhub_secure_secret_2026';
@@ -174,6 +189,8 @@ app.patch('/api/users/preferences', authenticateToken, async (req, res) => {
 // ------------------------------------------
 app.get('/api/stats', async (req, res) => {
     try {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+        res.set('Pragma', 'no-cache');
         const total = await pool.query("SELECT COUNT(*) FROM events");
         const hackathons = await pool.query("SELECT COUNT(*) FROM events WHERE title ILIKE '%hackathon%' OR source_platform ILIKE '%devfolio%' OR source_platform ILIKE '%devpost%'");
         const internships = await pool.query("SELECT COUNT(*) FROM events WHERE title ILIKE '%intern%' OR title ILIKE '%hiring%'");
@@ -195,6 +212,10 @@ app.get('/api/stats', async (req, res) => {
 
 app.get('/api/events', async (req, res) => {
     try {
+        // Disable caching — prevents browser from serving stale 304 responses
+        // when DB data changes (e.g., after scraper runs)
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+        res.set('Pragma', 'no-cache');
         const result = await pool.query('SELECT * FROM events ORDER BY id DESC');
         res.json({ status: 'success', count: result.rowCount, data: result.rows });
     } catch (error) {

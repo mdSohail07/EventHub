@@ -1,0 +1,20 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 20
+      arrivalRate: 50
+      name: "Warm up (50 users/sec)"
+    - duration: 40
+      arrivalRate: 200
+      name: "High load (200 users/sec)"
+    - duration: 20
+      arrivalRate: 500
+      name: "Spike test (500 users/sec)"
+scenarios:
+  - name: "Fetch all events"
+    flow:
+      - get:
+          url: "/api/events"
+      - think: 1
+      - get:
+          url: "/api/stats"
