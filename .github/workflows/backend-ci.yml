@@ -15,6 +15,7 @@ on:
     branches: [main]
     paths:
       - 'event-hub-backend/**'
+  workflow_dispatch:             # GitHub UI se manually bhi run kar sako
 
 jobs:
   # ─── JOB 1: CI — Check & Test ──────────────────────────────
