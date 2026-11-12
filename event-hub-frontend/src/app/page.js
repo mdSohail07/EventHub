@@ -30,10 +30,140 @@ import {
   Zap,
   Target,
   RefreshCw,
-  Radio
+  Radio,
+  CheckCircle2,
+  Clock,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Star,
+  Users,
+  Flame,
+  Shield,
+  Award,
+  Terminal,
+  Code2,
+  ArrowUpRight,
+  Compass
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+// Dynamic future deadline generator — ensures showcase events are always strictly upcoming
+const getFutureDate = (daysFromNow) => {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  return d.toISOString().split('T')[0];
+};
+
+const getUpcomingTechEvents = () => [
+  {
+    id: 't1',
+    title: 'ETHIndia 2026',
+    organizer: 'Devfolio & Ethereum Foundation',
+    source_platform: 'Devfolio',
+    category: 'Hackathons',
+    deadline: getFutureDate(18),
+    prize: '₹35,00,000 Pool',
+    tags: ['Web3', 'Solidity', 'Smart Contracts', 'Bangalore'],
+    ai_summary: 'Asia\'s flagship 36-hour Ethereum hackathon. Build dApps, protocol infrastructure, and DeFi protocols with mentorship from core Ethereum builders.',
+    match_score: '98%',
+    application_link: 'https://devfolio.co'
+  },
+  {
+    id: 't2',
+    title: 'Google Summer of Code (GSoC) 2026',
+    organizer: 'Google Open Source',
+    source_platform: 'Google',
+    category: 'Internships',
+    deadline: getFutureDate(25),
+    prize: '$3,000 - $6,600 Stipend',
+    tags: ['Open Source', 'Python', 'C++', 'Go', 'Remote'],
+    ai_summary: 'Global 12-week open source software development mentorship. Write production code for Linux, Apache, Python Software Foundation, and CNCF.',
+    match_score: '96%',
+    application_link: 'https://summerofcode.withgoogle.com'
+  },
+  {
+    id: 't3',
+    title: 'Uber HackTag 2026 (SDE Campus Challenge)',
+    organizer: 'Uber Engineering',
+    source_platform: 'Unstop',
+    category: 'Contests',
+    deadline: getFutureDate(12),
+    prize: 'PPI + ₹5,00,000',
+    tags: ['DSA', 'Algorithms', 'System Design', 'SDE-1'],
+    ai_summary: 'Uber India flagship coding challenge for engineering undergraduates. Top rankers receive direct SDE-1 and summer intern interview fast-tracks.',
+    match_score: '94%',
+    application_link: 'https://unstop.com'
+  },
+  {
+    id: 't4',
+    title: 'Smart India Hackathon (SIH 2026)',
+    organizer: 'Ministry of Education & AICTE',
+    source_platform: 'Govt Portal',
+    category: 'Hackathons',
+    deadline: getFutureDate(40),
+    prize: '₹1,00,000 per Problem',
+    tags: ['Full Stack', 'AI/ML', 'IoT', 'National'],
+    ai_summary: 'India\'s largest nationwide product hackathon solving critical software and hardware challenges curated by central ministries and tech leaders.',
+    match_score: '91%',
+    application_link: 'https://sih.gov.in'
+  },
+  {
+    id: 't5',
+    title: 'Flipkart GRiD 7.0 - SDE Track',
+    organizer: 'Flipkart India',
+    source_platform: 'Unstop',
+    category: 'Contests',
+    deadline: getFutureDate(9),
+    prize: '₹32 LPA PPI + ₹3,00,000',
+    tags: ['DSA', 'Competitive Programming', 'SDE'],
+    ai_summary: 'Algorithmic coding competition testing advanced data structures, graph theory, and scale design for pre-final and final year CS students.',
+    match_score: '95%',
+    application_link: 'https://unstop.com'
+  },
+  {
+    id: 't6',
+    title: 'LFX Mentorship (Linux Foundation) - Spring 2026',
+    organizer: 'Linux Foundation',
+    source_platform: 'Linux Foundation',
+    category: 'Internships',
+    deadline: getFutureDate(21),
+    prize: '$3,000 - $6,000 Stipend',
+    tags: ['Rust', 'Kubernetes', 'Linux Kernel', 'Remote'],
+    ai_summary: 'Direct remote mentorship on cloud-native and core Linux infrastructure projects with CNCF, Hyperledger, and OpenSSF maintainers.',
+    match_score: '93%',
+    application_link: 'https://lfx.linuxfoundation.org'
+  },
+  {
+    id: 't7',
+    title: 'Atlassian Off-Campus SDE Summer Intern 2026',
+    organizer: 'Atlassian',
+    source_platform: 'LinkedIn',
+    category: 'Internships',
+    deadline: getFutureDate(15),
+    prize: '₹1,00,000/mo Stipend',
+    tags: ['Java', 'Distributed Systems', 'Backend', '2027 Grad'],
+    ai_summary: 'Summer 2026 engineering internship to build high-scale distributed microservices powering Jira and Confluence Cloud systems.',
+    match_score: '97%',
+    application_link: 'https://linkedin.com'
+  },
+  {
+    id: 't8',
+    title: 'Codeforces Global Round 31',
+    organizer: 'Codeforces',
+    source_platform: 'Codeforces',
+    category: 'Contests',
+    deadline: getFutureDate(6),
+    prize: 'Rating + T-Shirts',
+    tags: ['C++', 'Competitive Programming', 'Algorithms'],
+    ai_summary: 'Rated 2.5-hour algorithmic contest open to Div 1 + Div 2 participants featuring 8 challenging problems curated by international grandmasters.',
+    match_score: '88%',
+    application_link: 'https://codeforces.com'
+  }
+];
+
+const FALLBACK_SHOWCASE_EVENTS = getUpcomingTechEvents();
 
 export default function EventHubMasterApp() {
   const [showLanding, setShowLanding] = useState(true);
@@ -48,6 +178,7 @@ export default function EventHubMasterApp() {
   const [authPassword, setAuthPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [isBackendOffline, setIsBackendOffline] = useState(false);
+  const [pendingIngest, setPendingIngest] = useState(false);
 
   // Submit / Ingest Modal States
   const [showAddModal, setShowAddModal] = useState(false);
@@ -79,6 +210,11 @@ export default function EventHubMasterApp() {
   const [searchQuery, setSearchQuery] = useState('');
   const [exploreTab, setExploreTab] = useState('All');
   const [selectedSource, setSelectedSource] = useState('All');
+
+  // Landing Page Interactive States
+  const [landingFilter, setLandingFilter] = useState('All');
+  const [landingSearchQuery, setLandingSearchQuery] = useState('');
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   // Load Saved Auth Session
   useEffect(() => {
@@ -147,6 +283,18 @@ export default function EventHubMasterApp() {
     refreshAllData();
   }, [currentUser, authToken]);
 
+  // Access Gate for Ingesting Opportunities
+  const handleOpenIngest = () => {
+    if (!currentUser) {
+      setAuthMode('login');
+      setAuthError('Please sign in or create an account to ingest an opportunity.');
+      setPendingIngest(true);
+      setShowAuthModal(true);
+    } else {
+      setShowAddModal(true);
+    }
+  };
+
   // Auth Submit (Strict Separation)
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
@@ -187,7 +335,12 @@ export default function EventHubMasterApp() {
         }
         
         setShowAuthModal(false);
-        setShowLanding(false);
+        if (pendingIngest) {
+          setPendingIngest(false);
+          setShowAddModal(true);
+        } else {
+          setShowLanding(false);
+        }
         setAuthEmail('');
         setAuthPassword('');
       } else {
@@ -340,6 +493,47 @@ export default function EventHubMasterApp() {
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${dateStr}/${dateStr}`;
   };
 
+  const formatDeadline = (dateStr) => {
+    if (!dateStr) return 'Rolling';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return String(dateStr);
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+    } catch {
+      return String(dateStr);
+    }
+  };
+
+  const isUpcoming = (deadlineStr) => {
+    if (!deadlineStr) return true; // Ongoing / rolling
+    try {
+      const d = new Date(deadlineStr);
+      if (isNaN(d.getTime())) return true;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return d.getTime() >= today.getTime();
+    } catch {
+      return true;
+    }
+  };
+
+  const getDaysBadge = (deadlineStr) => {
+    if (!deadlineStr) return 'Open & Ongoing';
+    try {
+      const d = new Date(deadlineStr);
+      if (isNaN(d.getTime())) return 'Active';
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diffDays = Math.ceil((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays <= 0) return 'Closes Today';
+      if (diffDays === 1) return 'Closes Tomorrow';
+      return `${diffDays} days left`;
+    } catch {
+      return 'Active';
+    }
+  };
+
   const getCurrentWeekDays = () => {
     const now = new Date();
     const currentDay = now.getDay();
@@ -368,7 +562,9 @@ export default function EventHubMasterApp() {
     return 'bg-purple-50 text-purple-700 border-purple-200';
   };
 
-  const filteredExploreEvents = events.filter(e => {
+  const filteredExploreEvents = events
+    .filter(e => isUpcoming(e.deadline))
+    .filter(e => {
     const titleText = (e.title || '').toLowerCase();
     const summaryText = (e.ai_summary || '').toLowerCase();
     const fullText = `${titleText} ${summaryText}`;
@@ -393,301 +589,518 @@ export default function EventHubMasterApp() {
   });
 
   // =========================================================================
-  // VIEW 1: HOME PAGE (AGGREGATOR HERO)
+  // VIEW 1: HOME PAGE (CLEAN DEVELOPER TECH DIRECTORY)
   // =========================================================================
   if (showLanding) {
+    const rawList = events && events.length > 0 ? events : FALLBACK_SHOWCASE_EVENTS;
+    const showcaseList = rawList.filter((item) => isUpcoming(item.deadline));
+    const filteredLandingEvents = showcaseList.filter((item) => {
+      const title = (item.title || '').toLowerCase();
+      const summary = (item.ai_summary || '').toLowerCase();
+      const platform = (item.source_platform || '').toLowerCase();
+      const organizer = (item.organizer || '').toLowerCase();
+      const tagsStr = (item.tags || []).join(' ').toLowerCase();
+      const combined = `${title} ${summary} ${platform} ${organizer} ${tagsStr}`;
+      
+      const matchesSearch = !landingSearchQuery || combined.includes(landingSearchQuery.toLowerCase());
+      
+      let matchesCat = true;
+      if (landingFilter === 'Hackathons') {
+        matchesCat = (item.category === 'Hackathons') || combined.includes('hackathon');
+      } else if (landingFilter === 'Internships') {
+        matchesCat = (item.category === 'Internships') || combined.includes('intern') || combined.includes('mentorship');
+      } else if (landingFilter === 'Contests') {
+        matchesCat = (item.category === 'Contests') || combined.includes('contest') || combined.includes('challenge') || combined.includes('round');
+      }
+      return matchesSearch && matchesCat;
+    });
+
+    const techFilterChips = ['All', 'DSA', 'Python', 'Web3', 'C++', 'Java', 'Rust', 'AI/ML', 'Remote'];
+
     return (
-      <div className="min-h-screen bg-[#0A071B] text-slate-100 flex flex-col justify-between font-sans selection:bg-indigo-500 selection:text-white relative overflow-hidden">
+      <div className="min-h-screen bg-[#FDFDFD] text-slate-800 flex flex-col font-sans selection:bg-indigo-100 selection:text-indigo-900 relative">
         
-        <div className="absolute -top-40 left-1/3 w-[550px] h-[550px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute -bottom-40 right-10 w-[500px] h-[500px] bg-purple-600/15 rounded-full blur-[120px] pointer-events-none"></div>
-
-        {/* Header */}
-        <header className="max-w-6xl mx-auto w-full px-6 py-5 flex items-center justify-between z-20">
-          <div className="flex items-center gap-2.5">
-            <div className="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white p-2 rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center">
-              <Calendar className="w-5 h-5" />
+        {/* Navigation Bar */}
+        <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            
+            {/* Logo - Matches Dashboard Brand Identically */}
+            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => { setLandingFilter('All'); setLandingSearchQuery(''); }}>
+              <div className="bg-[#4F46E5] text-white p-1.5 rounded-lg flex items-center justify-center shadow-xs">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-black tracking-tight text-[#1E1B4B] block leading-tight">EventHub</span>
+                <span className="text-[9px] text-indigo-600 font-bold tracking-wide uppercase bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md hidden sm:inline">
+                  Live Aggregator
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="text-xl font-black tracking-tight text-white block leading-tight">EventHub</span>
-              <span className="text-[10px] text-indigo-300 font-semibold tracking-wide uppercase">AI Opportunity Aggregator</span>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-3">
-            {currentUser ? (
+            {/* Quick Category Nav */}
+            <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-500">
+              <button 
+                type="button" 
+                onClick={() => { setLandingFilter('All'); setLandingSearchQuery(''); }}
+                className={`hover:text-[#4F46E5] transition-colors cursor-pointer ${landingFilter === 'All' ? 'text-[#4F46E5] font-bold' : ''}`}
+              >
+                All Opportunities
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setLandingFilter('Hackathons')}
+                className={`hover:text-[#4F46E5] transition-colors cursor-pointer ${landingFilter === 'Hackathons' ? 'text-[#4F46E5] font-bold' : ''}`}
+              >
+                Hackathons
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setLandingFilter('Internships')}
+                className={`hover:text-[#4F46E5] transition-colors cursor-pointer ${landingFilter === 'Internships' ? 'text-[#4F46E5] font-bold' : ''}`}
+              >
+                SDE Internships
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setLandingFilter('Contests')}
+                className={`hover:text-[#4F46E5] transition-colors cursor-pointer ${landingFilter === 'Contests' ? 'text-[#4F46E5] font-bold' : ''}`}
+              >
+                Coding Contests
+              </button>
+            </nav>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2.5">
               <button 
                 type="button"
-                onClick={() => setShowLanding(false)}
-                className="text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl shadow-md transition cursor-pointer"
+                onClick={handleOpenIngest}
+                className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-[#4F46E5] bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 px-3 py-1.5 rounded-xl transition cursor-pointer"
               >
-                Go to Dashboard →
+                <PlusCircle className="w-3.5 h-3.5 text-indigo-600" /> Ingest Notice
               </button>
-            ) : (
-              <>
+
+              {currentUser ? (
                 <button 
                   type="button"
-                  onClick={() => { setAuthMode('login'); setShowAuthModal(true); }}
-                  className="text-xs font-bold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl transition cursor-pointer"
+                  onClick={() => setShowLanding(false)}
+                  className="text-xs font-bold bg-[#4F46E5] hover:bg-[#4338CA] text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
-                  Sign In
+                  Dashboard <ArrowRight className="w-3.5 h-3.5" />
                 </button>
-                <button 
-                  type="button"
-                  onClick={() => { setAuthMode('signup'); setShowAuthModal(true); }}
-                  className="text-xs font-bold bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white px-5 py-2 rounded-xl shadow-lg shadow-indigo-600/30 transition cursor-pointer"
-                >
-                  Create Account
-                </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <button 
+                    type="button"
+                    onClick={() => { setAuthMode('login'); setShowAuthModal(true); }}
+                    className="text-xs font-semibold text-slate-600 hover:text-slate-900 px-3 py-1.5 transition cursor-pointer"
+                  >
+                    Sign In
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => { setAuthMode('signup'); setShowAuthModal(true); }}
+                    className="text-xs font-bold bg-[#4F46E5] hover:bg-[#4338CA] text-white px-3.5 py-1.5 rounded-xl transition shadow-xs cursor-pointer"
+                  >
+                    Create Account
+                  </button>
+                </>
+              )}
+            </div>
+
           </div>
         </header>
 
-        {/* Live Aggregation Ticker */}
-        <div className="max-w-5xl mx-auto w-full px-4 z-20 mb-2">
-          <div className="bg-indigo-950/60 border border-indigo-500/30 rounded-xl px-4 py-2 flex items-center justify-between text-xs backdrop-blur-md">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span className="text-indigo-200 font-semibold">Live Ingestion Engine Active:</span>
-              <span className="text-slate-300">Aggregating Unstop, Devfolio, Devpost, LinkedIn & Campus Notices</span>
-            </div>
-            <span className="text-[11px] text-indigo-300 hidden md:inline">Automated 24/7 Sync</span>
+        {/* HERO HEADER */}
+        <section className="pt-12 pb-8 px-4 sm:px-6 max-w-6xl mx-auto w-full text-left">
+          
+          <div className="inline-flex items-center gap-2 text-xs font-bold text-indigo-700 bg-indigo-50/80 border border-indigo-100 px-3 py-1 rounded-full mb-4 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Live Aggregator • {filteredLandingEvents.length} Active Opportunities</span>
           </div>
-        </div>
 
-        {/* Main Card */}
-        <main className="max-w-5xl mx-auto w-full px-4 py-4 z-20 my-auto">
-          <div className="bg-white text-slate-900 rounded-[2.2rem] p-7 md:p-10 shadow-2xl border border-slate-100 relative overflow-hidden">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight max-w-3xl">
+            Tech Hackathons, SDE Internships & Coding Contests.
+          </h1>
+
+          <p className="text-slate-600 text-sm sm:text-base max-w-2xl mt-4 leading-relaxed font-normal">
+            Aggregated in real-time across top student platforms like Devpost, Unstop, Devfolio, and career portals. Filtered strictly for engineering students so you never miss an application deadline.
+          </p>
+
+          {/* Quick Metrics Bar */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-8 pt-6 border-t border-slate-200/90 text-xs text-slate-600 font-semibold">
+            <span className="flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-emerald-600" /> 100% Software & Tech Focus
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-emerald-600" /> Direct Official Application URLs
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-emerald-600" /> 1-Click Google Calendar Sync
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-emerald-600" /> Zero Marketing or Spam Contests
+            </span>
+          </div>
+
+        </section>
+
+        {/* SEARCH & FILTERS BAR */}
+        <section className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-y border-slate-200/80 py-3.5 px-4 sm:px-6 shadow-2xs">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-black tracking-tight text-[#4338CA]">
-                  Problem: Finding Events Is Really Hard
-                </h1>
-                <p className="text-slate-600 font-medium text-xs md:text-sm mt-1.5">
-                  Students miss hackathons, internships, competitions, and workshops because event information is <strong className="text-indigo-600">scattered everywhere</strong>.
-                </p>
-              </div>
-              <div className="flex items-center gap-1.5 pt-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-300"></span>
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-200"></span>
-              </div>
+            {/* Category Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+              {[
+                { label: 'All Tech', value: 'All' },
+                { label: 'Hackathons', value: 'Hackathons' },
+                { label: 'SDE Internships', value: 'Internships' },
+                { label: 'Coding Contests', value: 'Contests' }
+              ].map((tab) => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => setLandingFilter(tab.value)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                    landingFilter === tab.value 
+                      ? 'bg-[#4F46E5] text-white shadow-xs' 
+                      : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-6 items-center">
-              
-              {/* Left Platforms */}
-              <div className="lg:col-span-7 bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 flex flex-col items-center justify-between min-h-[320px]">
-                
-                <div className="w-full grid grid-cols-3 gap-2.5">
-                  <div className="bg-white border border-slate-200/90 p-2.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 text-xs font-bold text-sky-600">
-                    <span className="w-2 h-2 rounded-full bg-sky-500"></span> unstop
-                  </div>
-
-                  <div className="bg-white border border-slate-200/90 p-2.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 text-xs font-bold text-blue-600">
-                    <span className="w-2 h-2 rounded-full bg-blue-600"></span> devfolio
-                  </div>
-
-                  <div className="bg-white border border-slate-200/90 p-2.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 text-xs font-bold text-indigo-700">
-                    <Globe className="w-3.5 h-3.5" /> College Site
-                  </div>
-                </div>
-
-                <div className="my-3 relative flex items-center justify-center">
-                  <div className="w-20 h-20 rounded-full bg-indigo-100 border-4 border-white shadow-md flex items-center justify-center text-3xl">
-                    👨‍💻
-                  </div>
-                  <span className="absolute -top-1 -right-1 text-xs font-black text-indigo-600 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow">?</span>
-                </div>
-
-                <div className="w-full grid grid-cols-3 gap-2.5">
-                  <div className="bg-white border border-slate-200/90 p-2.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 text-xs font-bold text-blue-700">
-                    <span className="text-xs font-black">in</span> LinkedIn
-                  </div>
-
-                  <div className="bg-white border border-slate-200/90 p-2.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 text-xs font-bold text-purple-600">
-                    <Layers className="w-3.5 h-3.5" /> Discord
-                  </div>
-
-                  <div className="bg-white border border-slate-200/90 p-2.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-600">
-                    <span className="text-xs font-black">💬</span> WhatsApp
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-2 mt-3.5">
-                  <span className="px-2.5 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-[10px] font-bold">
-                    📅 Missed Deadline
-                  </span>
-                  <span className="px-2.5 py-1 bg-rose-50 border border-rose-200 text-rose-600 rounded-lg text-[10px] font-bold">
-                    ✕ Registration Closed
-                  </span>
-                  <span className="px-2.5 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-[10px] font-bold">
-                    ⚠️ Forgot to Apply
-                  </span>
-                </div>
-              </div>
-
-              {/* Right Side */}
-              <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between h-full space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                  <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-xs">
-                    ?
-                  </div>
-                  <h3 className="text-sm font-black text-slate-900">Why Does This Happen?</h3>
-                </div>
-
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-700">
-                    <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                    <span>Information is scattered</span>
-                  </div>
-
-                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-700">
-                    <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                    <span>Too many platforms</span>
-                  </div>
-
-                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-700">
-                    <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                    <span>Missed deadlines</span>
-                  </div>
-
-                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-700">
-                    <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                    <span>No personalized recommendations</span>
-                  </div>
-                </div>
-
+            {/* Search Input */}
+            <div className="relative w-full md:w-80">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input 
+                type="text"
+                placeholder="Search tech (e.g. Python, DSA, Web3)..."
+                value={landingSearchQuery}
+                onChange={(e) => setLandingSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
+              />
+              {landingSearchQuery && (
                 <button 
                   type="button"
-                  onClick={() => { setAuthMode('signup'); setShowAuthModal(true); }}
-                  className="w-full py-2.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20 transition cursor-pointer"
+                  onClick={() => setLandingSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs cursor-pointer"
                 >
-                  Explore Centralized Hub →
+                  ✕
                 </button>
-              </div>
-
-            </div>
-
-            {/* Bottom Quote Banner */}
-            <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-indigo-50 border border-amber-200/80 rounded-2xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">💡</span>
-                <div className="text-xs md:text-sm font-black text-slate-800">
-                  Opportunities are everywhere. <span className="text-[#EA580C]">Visibility isn't.</span>
-                </div>
-              </div>
-
-              <button 
-                type="button"
-                onClick={() => {
-                  if (currentUser) {
-                    setShowLanding(false);
-                  } else {
-                    setAuthMode('login');
-                    setShowAuthModal(true);
-                  }
-                }}
-                className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-indigo-600 flex items-center gap-1.5 transition shadow-xs cursor-pointer"
-              >
-                Sign In to Start <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              )}
             </div>
 
           </div>
 
-          {/* Aggregator Pillars */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-            <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 font-bold">
-                <Zap className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black text-white">Automated Web Scraper</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Aggregates Unstop, Devpost & Devfolio.</p>
-              </div>
-            </div>
+          {/* Quick Tech Tag Chips */}
+          <div className="max-w-6xl mx-auto mt-2.5 flex items-center gap-1.5 flex-wrap">
+            <span className="text-xs text-slate-400 font-mono mr-1">Filter by skill:</span>
+            {techFilterChips.map((chip) => {
+              const isActive = (chip === 'All' && !landingSearchQuery) || 
+                               (chip !== 'All' && landingSearchQuery.toLowerCase() === chip.toLowerCase());
+              return (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => {
+                    if (chip === 'All') setLandingSearchQuery('');
+                    else setLandingSearchQuery(chip);
+                  }}
+                  className={`px-2.5 py-0.5 rounded-md text-xs font-mono transition cursor-pointer border ${
+                    isActive 
+                      ? 'bg-indigo-50 text-[#4F46E5] border-indigo-200 font-bold shadow-2xs' 
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  {chip}
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
-            <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center shrink-0 font-bold">
-                <Target className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black text-white">Smart Match Scoring</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Personalized recommendations for your skills.</p>
-              </div>
-            </div>
+        {/* OPPORTUNITY FEED CARDS */}
+        <main className="py-8 px-4 sm:px-6 max-w-6xl mx-auto w-full flex-1">
+          
+          <div className="flex items-center justify-between mb-5">
+            <span className="text-xs text-slate-500 font-medium">
+              Showing <strong className="text-slate-900 font-bold">{filteredLandingEvents.length}</strong> engineering opportunities
+            </span>
+            {(landingSearchQuery || landingFilter !== 'All') && (
+              <button 
+                type="button"
+                onClick={() => { setLandingFilter('All'); setLandingSearchQuery(''); }}
+                className="text-xs font-semibold text-[#4F46E5] hover:underline cursor-pointer"
+              >
+                Reset filters
+              </button>
+            )}
+          </div>
 
-            <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-bold">
-                <CalendarCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black text-white">1-Click Google Cal Sync</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Never miss application deadlines again.</p>
-              </div>
+          {filteredLandingEvents.length === 0 ? (
+            <div className="p-12 text-center rounded-2xl bg-white border border-slate-200 shadow-xs">
+              <p className="text-sm text-slate-800 font-bold mb-1">No opportunities found matching your filter.</p>
+              <p className="text-xs text-slate-500 mb-4">Try clearing the search query or selecting "All Tech".</p>
+              <button 
+                type="button"
+                onClick={() => { setLandingFilter('All'); setLandingSearchQuery(''); }}
+                className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-xs"
+              >
+                View All Opportunities
+              </button>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredLandingEvents.map((item) => (
+                <div 
+                  key={item.id}
+                  className="bg-white border border-slate-200/90 hover:border-indigo-300 hover:shadow-md rounded-2xl p-5 flex flex-col justify-between transition-all group shadow-xs"
+                >
+                  <div>
+                    {/* Top Row: Platform Pill + Category + Prize */}
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                          {item.source_platform}
+                        </span>
+                        <span className="text-xs text-slate-500 font-medium">
+                          • {item.category}
+                        </span>
+                      </div>
+
+                      {item.prize && (
+                        <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                          {item.prize}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Event Title */}
+                    <h3 className="text-base font-bold text-slate-900 group-hover:text-[#4F46E5] transition-colors leading-snug mb-1">
+                      {item.title}
+                    </h3>
+
+                    {/* Organizer / Host */}
+                    {item.organizer && (
+                      <p className="text-xs text-slate-500 mb-3">
+                        Host: <span className="text-slate-700 font-medium">{item.organizer}</span>
+                      </p>
+                    )}
+
+                    {/* Tech Tags */}
+                    {item.tags && item.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3.5">
+                        {item.tags.map((tag) => (
+                          <span 
+                            key={tag}
+                            onClick={() => setLandingSearchQuery(tag)}
+                            className="text-xs font-mono bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-[#4F46E5] px-2 py-0.5 rounded-md cursor-pointer transition border border-slate-200/80"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Description Summary */}
+                    <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 mb-4">
+                      {item.ai_summary}
+                    </p>
+                  </div>
+
+                  {/* Bottom Row: Deadline & Actions */}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2" suppressHydrationWarning>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        {getDaysBadge(item.deadline)}
+                      </span>
+                      <span className="text-xs text-slate-400 hidden sm:inline font-medium">
+                        • {formatDeadline(item.deadline)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button 
+                        type="button"
+                        onClick={() => setSelectedEvent(item)}
+                        className="px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition cursor-pointer"
+                      >
+                        Details
+                      </button>
+
+                      <a 
+                        href={createGoogleCalUrl(item.title, item.deadline)}
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-emerald-700 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-xl transition flex items-center gap-1 cursor-pointer"
+                        title="Add to Google Calendar"
+                      >
+                        <CalendarPlus className="w-3.5 h-3.5 text-emerald-600" /> Cal
+                      </a>
+
+                      <a 
+                        href={item.application_link || '#'} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="px-3 py-1.5 text-xs font-bold bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer"
+                      >
+                        Apply <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Bottom Community Notice Banner */}
+          <div className="mt-10 p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h4 className="text-sm font-bold text-[#1E1B4B]">Know a hackathon or internship drive not listed here?</h4>
+              <p className="text-xs text-slate-600 mt-0.5">Paste raw WhatsApp circulars or notice posters. Our parser indexes it for everyone.</p>
+            </div>
+            <button 
+              type="button"
+              onClick={handleOpenIngest}
+              className="px-3.5 py-2 bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5"
+            >
+              <PlusCircle className="w-3.5 h-3.5 text-indigo-600" /> Ingest Opportunity
+            </button>
           </div>
 
         </main>
 
-        <footer className="max-w-5xl mx-auto w-full text-center text-[11px] text-slate-500 py-4 z-20">
-          © 2026 EventHub. Intelligent opportunity discovery & tracking platform. All rights reserved.
+        {/* WHY WE BUILT THIS (SIMPLE DEVELOPER NOTES, NO MARKETING SLOP) */}
+        <section className="border-t border-slate-200/80 py-12 px-4 sm:px-6 bg-slate-50/70">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-base font-bold text-slate-900 mb-6">Why EventHub?</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              <div className="space-y-2 p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+                <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center font-mono text-xs font-bold">
+                  01
+                </div>
+                <h3 className="text-sm font-bold text-slate-900">100% Software Engineering Only</h3>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  Every listed challenge involves writing code, building systems, or solving algorithmic problems. No non-tech quiz forms or random essay competitions.
+                </p>
+              </div>
+
+              <div className="space-y-2 p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+                <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center font-mono text-xs font-bold">
+                  02
+                </div>
+                <h3 className="text-sm font-bold text-slate-900">1-Click Google Calendar Sync</h3>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  Click 'Cal' to create a pre-filled event in your Google Calendar with links and reminders, so you never rush an application at 11:58 PM.
+                </p>
+              </div>
+
+              <div className="space-y-2 p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+                <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center font-mono text-xs font-bold">
+                  03
+                </div>
+                <h3 className="text-sm font-bold text-slate-900">Campus & Discord Notice Parser</h3>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  Got an unstructured circular from your college club or a Discord announcement? Paste it into our parser to extract clean deadlines and register links.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* DEVELOPER FOOTER */}
+        <footer className="border-t border-slate-200 py-6 px-4 sm:px-6 text-xs text-slate-500 bg-white">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-800">EventHub</span>
+              <span>• Live aggregator for student developers and competitive programmers.</span>
+            </div>
+
+            <div className="flex items-center gap-4 text-slate-600 font-medium">
+              <button 
+                type="button" 
+                onClick={() => { setLandingFilter('All'); setLandingSearchQuery(''); }}
+                className="hover:text-[#4F46E5] cursor-pointer transition-colors"
+              >
+                All Tech Events
+              </button>
+              <button 
+                type="button" 
+                onClick={handleOpenIngest}
+                className="hover:text-[#4F46E5] cursor-pointer transition-colors"
+              >
+                Ingest Notice
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setShowLanding(false)}
+                className="hover:text-[#4F46E5] cursor-pointer transition-colors font-bold"
+              >
+                Dashboard →
+              </button>
+            </div>
+          </div>
         </footer>
 
-        {/* Auth Modal */}
+        {/* AUTH MODAL */}
         {showAuthModal && (
-          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 text-slate-800">
-            <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95">
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 text-slate-800">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-black text-slate-900">
-                  {authMode === 'login' ? 'Login to EventHub' : 'Create Account'}
-                </h2>
-                <button type="button" onClick={() => setShowAuthModal(false)} className="text-slate-400 hover:text-slate-600 text-sm cursor-pointer">✕</button>
+                <div className="flex items-center gap-2">
+                  <div className="bg-[#4F46E5] text-white p-1 rounded-md">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-slate-900">
+                    {authMode === 'login' ? 'Login to EventHub' : 'Create Free Account'}
+                  </h2>
+                </div>
+                <button type="button" onClick={() => setShowAuthModal(false)} className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer">✕</button>
               </div>
 
               {authError && (
-                <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-semibold">
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold">
                   {authError}
                 </div>
               )}
 
               <form onSubmit={handleAuthSubmit} className="space-y-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-600 block mb-1">Email</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Email address</label>
                   <input 
                     type="email" 
                     required
-                    placeholder="name@example.com"
+                    placeholder="dev@example.com"
                     value={authEmail}
                     onChange={(e) => setAuthEmail(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-600 block mb-1">Password</label>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Password</label>
                   <input 
                     type="password" 
                     required
                     placeholder="••••••••"
                     value={authPassword}
                     onChange={(e) => setAuthPassword(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
                   />
                 </div>
 
                 <button 
                   type="submit" 
-                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition mt-2 shadow-xs cursor-pointer"
+                  className="w-full py-2.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold rounded-xl text-xs transition shadow-xs mt-2 cursor-pointer"
                 >
-                  {authMode === 'login' ? 'Sign In' : 'Sign Up'}
+                  {authMode === 'login' ? 'Sign In' : 'Create Free Account'}
                 </button>
               </form>
 
@@ -696,10 +1109,217 @@ export default function EventHubMasterApp() {
                 <button 
                   type="button"
                   onClick={() => { setAuthMode(authMode === 'login' ? 'signup' : 'login'); setAuthError(''); }}
-                  className="text-indigo-600 font-bold hover:underline cursor-pointer"
+                  className="text-[#4F46E5] font-bold hover:underline cursor-pointer"
                 >
                   {authMode === 'login' ? 'Sign Up' : 'Login'}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* INGEST OPPORTUNITY MODAL (Protected: Requires Authenticated User) */}
+        {showAddModal && currentUser && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 text-slate-800">
+            <div className="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900">Ingest Notice / Hackathon</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Extract event details via AI from WhatsApp messages, Discord or circulars</p>
+                </div>
+                <button type="button" onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer">✕</button>
+              </div>
+
+              <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+                <button 
+                  type="button"
+                  onClick={() => setAddMode('ai')}
+                  className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${addMode === 'ai' ? 'bg-white text-[#4F46E5] font-bold shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                  ✨ AI Text Ingestion
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setAddMode('manual')}
+                  className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${addMode === 'manual' ? 'bg-white text-[#4F46E5] font-bold shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                  📝 Manual Form
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateEvent} className="space-y-3">
+                {addMode === 'ai' ? (
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Paste Raw Notice / Discord / WhatsApp Content</label>
+                    <textarea 
+                      rows={4}
+                      required
+                      placeholder="Paste college club announcement or WhatsApp text here. AI will automatically extract deadline, title, and summary..."
+                      value={rawText}
+                      onChange={(e) => setRawText(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none transition"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-semibold text-slate-700 block mb-1">Opportunity Title</label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="e.g. ACM Summer CodeSprint 2026"
+                        value={manualData.title}
+                        onChange={(e) => setManualData({...manualData, title: e.target.value})}
+                        className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 block mb-1">Source / Platform</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. Unstop, Campus Club"
+                          value={manualData.source_platform}
+                          onChange={(e) => setManualData({...manualData, source_platform: e.target.value})}
+                          className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 block mb-1">Deadline Date</label>
+                        <input 
+                          type="date" 
+                          required
+                          value={manualData.deadline}
+                          onChange={(e) => setManualData({...manualData, deadline: e.target.value})}
+                          className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-slate-700 block mb-1">Brief Summary</label>
+                      <input 
+                        type="text" 
+                        placeholder="Short overview of the hackathon or role"
+                        value={manualData.ai_summary}
+                        onChange={(e) => setManualData({...manualData, ai_summary: e.target.value})}
+                        className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">Official Registration Link (URL)</label>
+                  <input 
+                    type="url" 
+                    placeholder="https://..."
+                    value={manualData.application_link}
+                    onChange={(e) => setManualData({...manualData, application_link: e.target.value})}
+                    className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-end gap-2">
+                  <button 
+                    type="button" 
+                    onClick={() => setShowAddModal(false)}
+                    className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
+                  >
+                    {isSubmitting ? 'Parsing & Indexing...' : 'Index Opportunity'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* DETAILS MODAL */}
+        {selectedEvent && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 text-slate-800">
+            <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95">
+              <div className="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
+                <button 
+                  type="button" 
+                  onClick={() => setSelectedEvent(null)}
+                  className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" /> Back
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setSelectedEvent(null)}
+                  className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                      {selectedEvent.source_platform}
+                    </span>
+                    {selectedEvent.prize && (
+                      <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                        {selectedEvent.prize}
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-lg font-bold text-slate-900 leading-snug">{selectedEvent.title}</h2>
+                  {selectedEvent.organizer && (
+                    <p className="text-xs text-slate-500 mt-1">Host: <span className="font-semibold text-slate-700">{selectedEvent.organizer}</span></p>
+                  )}
+                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-2" suppressHydrationWarning>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      {getDaysBadge(selectedEvent.deadline)}
+                    </span>
+                    <span>Deadline: <strong className="text-slate-800">{formatDeadline(selectedEvent.deadline)}</strong></span>
+                  </p>
+                </div>
+
+                {selectedEvent.tags && selectedEvent.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {selectedEvent.tags.map((tag) => (
+                      <span key={tag} className="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="p-3.5 rounded-xl bg-indigo-50/50 border border-indigo-100/70 space-y-1">
+                  <span className="text-xs font-bold text-indigo-700 uppercase">AI Parsed Summary</span>
+                  <p className="text-xs text-slate-600 leading-relaxed">{selectedEvent.ai_summary}</p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <a 
+                    href={selectedEvent.application_link || '#'} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="flex-1 py-2.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer"
+                  >
+                    Apply on {selectedEvent.source_platform} <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+
+                  <a 
+                    href={createGoogleCalUrl(selectedEvent.title, selectedEvent.deadline)}
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                  >
+                    <CalendarPlus className="w-3.5 h-3.5 text-emerald-600" /> Add to Cal
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -731,7 +1351,7 @@ export default function EventHubMasterApp() {
           {/* Secondary Ingest Link */}
           <button 
             type="button"
-            onClick={() => setShowAddModal(true)}
+            onClick={handleOpenIngest}
             className="w-full py-2 px-3 bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-2xs cursor-pointer"
           >
             <PlusCircle className="w-4 h-4 text-indigo-600" /> Ingest Opportunity
@@ -975,8 +1595,8 @@ export default function EventHubMasterApp() {
                             </span>
                             <span className="text-[10px] text-slate-400 font-medium">• Scraped Live</span>
                           </div>
-                          <p className="text-[11px] text-rose-500 font-semibold mt-1">
-                            🗓️ {event.deadline ? new Date(event.deadline).toLocaleDateString() : 'Rolling'}
+                          <p className="text-[11px] text-rose-500 font-semibold mt-1" suppressHydrationWarning>
+                            🗓️ {formatDeadline(event.deadline)}
                           </p>
                         </div>
 
@@ -1011,8 +1631,8 @@ export default function EventHubMasterApp() {
                         </span>
                         <div>
                           <span className="text-xs font-bold text-slate-900 block">{event.title}</span>
-                          <span className="text-[11px] text-slate-400 font-medium">
-                            🗓️ Deadline: {event.deadline ? new Date(event.deadline).toLocaleDateString() : 'Rolling'}
+                          <span className="text-[11px] text-slate-400 font-medium" suppressHydrationWarning>
+                            🗓️ Deadline: {formatDeadline(event.deadline)}
                           </span>
                         </div>
                       </div>
@@ -1132,7 +1752,7 @@ export default function EventHubMasterApp() {
                             <span className={`px-2 py-0.5 rounded-md border text-[10px] font-bold ${getSourceBadge(evt.source_platform)}`}>
                               🌐 {evt.source_platform}
                             </span>
-                            <span>🗓️ {evt.deadline ? new Date(evt.deadline).toLocaleDateString() : 'Rolling'}</span>
+                            <span suppressHydrationWarning>🗓️ {formatDeadline(evt.deadline)}</span>
                           </div>
 
                           <p className="text-xs text-slate-600 leading-relaxed">
@@ -1185,8 +1805,8 @@ export default function EventHubMasterApp() {
 
                         <div className="col-span-3 flex items-center gap-1.5 text-xs">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="text-slate-600 font-medium">
-                            {item.deadline ? new Date(item.deadline).toLocaleDateString() : 'Upcoming'}
+                          <span className="text-slate-600 font-medium" suppressHydrationWarning>
+                            {formatDeadline(item.deadline)}
                           </span>
                         </div>
 

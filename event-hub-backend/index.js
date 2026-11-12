@@ -191,10 +191,11 @@ app.get('/api/stats', async (req, res) => {
     try {
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.set('Pragma', 'no-cache');
-        const total = await pool.query("SELECT COUNT(*) FROM events");
-        const hackathons = await pool.query("SELECT COUNT(*) FROM events WHERE title ILIKE '%hackathon%' OR source_platform ILIKE '%devfolio%' OR source_platform ILIKE '%devpost%'");
-        const internships = await pool.query("SELECT COUNT(*) FROM events WHERE title ILIKE '%intern%' OR title ILIKE '%hiring%'");
-        const contests = await pool.query("SELECT COUNT(*) FROM events WHERE title ILIKE '%challenge%' OR title ILIKE '%contest%' OR title ILIKE '%championship%'");
+        const activeCondition = "WHERE deadline IS NULL OR deadline >= NOW() - INTERVAL '1 day'";
+        const total = await pool.query(`SELECT COUNT(*) FROM events ${activeCondition}`);
+        const hackathons = await pool.query(`SELECT COUNT(*) FROM events ${activeCondition} AND (title ILIKE '%hackathon%' OR source_platform ILIKE '%devfolio%' OR source_platform ILIKE '%devpost%')`);
+        const internships = await pool.query(`SELECT COUNT(*) FROM events ${activeCondition} AND (title ILIKE '%intern%' OR title ILIKE '%hiring%' OR title ILIKE '%mentorship%')`);
+        const contests = await pool.query(`SELECT COUNT(*) FROM events ${activeCondition} AND (title ILIKE '%challenge%' OR title ILIKE '%contest%' OR title ILIKE '%championship%' OR title ILIKE '%round%')`);
 
         res.json({
             status: 'success',
@@ -213,10 +214,12 @@ app.get('/api/stats', async (req, res) => {
 app.get('/api/events', async (req, res) => {
     try {
         // Disable caching — prevents browser from serving stale 304 responses
-        // when DB data changes (e.g., after scraper runs)
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.set('Pragma', 'no-cache');
-        const result = await pool.query('SELECT * FROM events ORDER BY id DESC');
+        // Only return active and upcoming events (filter out passed/expired deadlines)
+        const result = await pool.query(
+            "SELECT * FROM events WHERE deadline IS NULL OR deadline >= NOW() - INTERVAL '1 day' ORDER BY deadline ASC NULLS LAST, id DESC"
+        );
         res.json({ status: 'success', count: result.rowCount, data: result.rows });
     } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });
